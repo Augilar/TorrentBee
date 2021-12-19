@@ -1,7 +1,10 @@
 'use strict'
 
 const Buffer = require('buffer').Buffer;
+const bn = require('bn.js');
 
-const buf = Buffer.from('1234');
+var n = new bn(121);
 
-console.log(buf.join(','));
+var k = n.toBuffer('be', 10);
+
+console.log(n);

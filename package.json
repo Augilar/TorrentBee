@@ -4,7 +4,9 @@
   "description": "A personal torrent-client software",
   "main": "index.js",
   "dependencies": {
-    "bencode": "^2.0.2"
+    "bencode": "^2.0.2",
+    "bn": "^1.0.5",
+    "bn.js": "^5.2.0"
   },
   "devDependencies": {},
   "scripts": {
