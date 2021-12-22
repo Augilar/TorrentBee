@@ -6,7 +6,7 @@ const urlParse = require('url').parse;
 //for connection id
 const crypto = require('crypto');
 const util = require('./util');
-const torrentParser = reqire('./torrent-parser')
+const torrentParser = require('./torrent-parser')
 
 module.exports.getPeers = (torrent, callback) => {
 
@@ -14,22 +14,32 @@ module.exports.getPeers = (torrent, callback) => {
     const url = torrent.announce.toString('utf8');
 
     // for the connection request
-    udpSend(socket, url, buildConnReq());
+    udpSend(socket, buildConnReq(), url, () => {
+        console.log("udp connect request sent!!");
+    });
 
     socket.on('message', response => {
+
+        console.log("message recieved !!");
+
         if(respType(response) == 'connect'){
+            console.log("connect - response");
             //get the connection id
             const connResp = parseConnResp(response);
 
             //send an announce request
             const announceReq = buildAnnounceReq(connResp.connection_id, torrent); 
-            udpSend(socket, url, announceReq);
+            udpSend(socket, announceReq, url, () => {
+                console.log("udp announce request sent !!");
+            });
         }else if(respType(response) == 'announce'){
 
+            console.log("announce - response");
             //take the peer list from announce response
             const announceResp = announceRespParser(response);
 
             //send the peerlist back using the call back function
+            //console.log(announceResp);
             callback(announceResp.peers)
 
         }
@@ -39,12 +49,22 @@ module.exports.getPeers = (torrent, callback) => {
 
 function udpSend(socket, message, rawUrl, callback= () => {} ){
     const url = urlParse(rawUrl);
-    socket.send(message, 0, message.length, url.port, url.host, callback);
+    //console.log(rawUrl, " ", url.host, " ", url.port);
+    socket.send(message, 0, message.length, url.port, url.hostname, callback);
 }
 
-function respType(){
+//udpSend checker
+// let urlTest = {
+//     host : "127.0.0.1",
+//     port : "8081"
+// }
+// let message = Buffer.from("YO Bhai!!!");
+// let socket = dgram.createSocket('udp4');
+// let someFunc = () => {
+//     console.log("callBack");
+// }
 
-}
+// udpSend(socket, buildConnReq(), urlTest);
 
 function buildConnReq(){
     //follow the udp connection request format
@@ -93,11 +113,11 @@ function buildAnnounceReq(conn_id, torrent, port=6881){
     //peer_id
     util.genId().copy(buf, 36);
     //downloaded
-    buf.alloc(8).copy(buf, 56);
+    Buffer.alloc(8).copy(buf, 56);
     //left
-    torrentParser.left(torrent).copy(buf, 64);
+    torrentParser.size(torrent).copy(buf, 64);
     //uploaded
-    buf.alloc(8).copy(buf, 72);
+    Buffer.alloc(8).copy(buf, 72);
     //event
     buf.writeUint32BE(0, 80);
     //IP address
@@ -123,19 +143,29 @@ function announceRespParser(resp){
         return groups;
     }
     
-    
+    //console.log(resp.length);
     return {
         action: resp.readUint32BE(0),
         transaction_id: resp.readUint32BE(4),
         intervals: resp.readUint32BE(8),
         leechers: resp.readUint32BE(12),
-        seeders: readUint32BE(16),
-        peers : group(resp.slice(20, 6)).map(add => {
+        seeders: resp.readUint32BE(16),
+        peers : group(resp.slice(20), 6).map(add => {
             return {
-                ip_address: add.slice(0,4).join('.'),
+                ip: add.slice(0,4).join('.'),
                 port: add.readUint16BE(4)
             }
         })
 
+    }
+}
+
+
+function respType(resp){
+    let type = resp.readUint32BE(0);
+    if(type === 0){
+        return "connect";
+    }else if(type === 1){
+        return "announce";
     }
 }
