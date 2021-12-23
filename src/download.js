@@ -2,24 +2,26 @@
 
 const net = require('net');
 const tracker = require('./tracker');
+const message = require("./message")
 
 module.exports = (torrent) => {
     tracker.getPeers(torrent, (peers) => {
         console.log("List of peers : ", peers);
-        peers.forEach(download);
+        peers.forEach(peer => download(peer, torrent));
     });
-}
+};
 
-function download(peer) {
+function download(peer, torrent) {
     const socket = net.Socket();
     socket.on('error', console.log);
     socket.connect(peer.port, peer.ip, () => {
         console.log("tcp connection made");
+        socket.write(message.buildHandshake(torrent));
     });
-    onWholeMsg(socket, data => {
-
+    onWholeMsg(socket, msg => {
+        msgHandler(msg, socket);
     });
-}
+};
 
 function onWholeMsg(socket, callback) {
     let savedBuf = Buffer.alloc(0);
@@ -36,4 +38,12 @@ function onWholeMsg(socket, callback) {
             handshake = false;
         }
     });
-}
+};
+
+function msgHandler(msg, socket) {
+    if(isHandshake(msg)) socket.write(message.buildInterested());
+};
+
+function isHandshake(msg) {
+    return msg.length === msg.readUInt8(0) + 49 && msg.toString('utf8', 1) === 'BitTorrent protocol';
+};
