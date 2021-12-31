@@ -2,13 +2,15 @@
 
 const net = require('net');
 const tracker = require('./tracker');
-const message = require("./message")
-const Pieces = require("./Pieces.js");
+const message = require("./message");
+const Pieces = require("./Pieces");
+const Queue = require("./Queue");
 
 module.exports = (torrent) => {
     
     tracker.getPeers(torrent, (peers) => {
-        const pieces = new Pieces(torrent.info.pieces.length/20);
+        const pieces = new Pieces(torrent);
+        //because the pieces will have 20byte hash for each piece
         console.log("List of peers : ", peers);
         peers.forEach(peer => download(peer, torrent, pieces));
     });
@@ -21,7 +23,7 @@ function download(peer, torrent, pieces) {
         console.log("tcp connection made");
         socket.write(message.buildHandshake(torrent));
     });
-    const queue = {choked: true, queue: []};
+    const queue = new Queue(torrent);
     onWholeMsg(socket, msg => {
         msgHandler(msg, socket, pieces, queue);
     });
@@ -95,11 +97,11 @@ function pieceHandler(payload, socket, requested, queue) {
 function requestPiece(socket, pieces, queue) {
     if (queue.choked) return null;
 
-    while (queue.queue.length) {
-        const pieceIndex = queue.shift();
-        if (pieces.needed(pieceIndex)) {
-            socket.write(message.buildRequest(pieceIndex));
-            pieces.addRequest(pieceIndex);
+    while (queue.length()) {
+        const pieceBlock = queue.deque();
+        if (pieces.needed(pieceBlock)) {
+            socket.write(message.buildRequest(pieceBlock));
+            pieces.addRequest(pieceBlock);
             break;
         }
     }
