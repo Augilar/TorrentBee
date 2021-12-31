@@ -12,13 +12,13 @@ module.exports.buildHandshake = torrent => {
     // info-hash - sha1 hash of info from torrent
     // peer-id - "-VK001-" that one...
 
-    const buf = Buffer.alloc();
+    const buf = Buffer.alloc(68);
 
     buf.writeUInt8(19, 0);
     buf.write('BitTorrent protocol', 1);
     buf.writeUInt32BE(0, 20);
     buf.writeUInt32BE(0, 24);
-    torrentParser.infoHash.copy(buf, 28);
+    torrentParser.infoHash(torrent).copy(buf, 28);
     buf.write(util.genId());
     return buf;   
 }

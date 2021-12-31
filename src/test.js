@@ -10,8 +10,12 @@ const urlParse = require('url').parse;
 
 // var k = n.toBuffer('be', 10);
 
-let torrent = bencode.decode(fs.readFileSync('test-multi.torrent'));
-console.log(urlParse(torrent.announce.toString('utf8')));
+let torrent = bencode.decode(fs.readFileSync('test-torrent3.torrent'));
+//console.log(torrent['announce-list'].toString('utf8'));
+
+for(let i=0;i<torrent['announce-list'].length;i++){
+    console.log(torrent['announce-list'][i].toString());
+}
 
 // let buf = Buffer.alloc(5);
 // console.log(buf);
