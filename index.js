@@ -10,4 +10,4 @@ const torrent = torrentParser.open('test-torrent3.torrent');
 
 //console.log(torrent);
 
-download(torrent);
+download(torrent, torrent.info.name);

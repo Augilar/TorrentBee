@@ -5,14 +5,16 @@ const tracker = require('./tracker');
 const message = require("./message");
 const Pieces = require("./Pieces");
 const Queue = require("./Queue");
+const fs = require("fs");
 
-module.exports = (torrent) => {
+module.exports = (torrent, path) => {
     
     tracker.getPeers(torrent, (peers) => {
         const pieces = new Pieces(torrent);
         //because the pieces will have 20byte hash for each piece
+        const file = fs.openSync(path, 'w');
         console.log("List of peers : ", peers);
-        peers.forEach(peer => download(peer, torrent, pieces));
+        peers.forEach(peer => download(peer, torrent, pieces, file));
     });
 };
 
@@ -73,25 +75,45 @@ function unchokeHandler(socket, pieces, queue) {
     requestPiece(socket, pieces, queue);
 };
 
-function haveHandler(payload, socket, requested) {
+function haveHandler(socket, pieces, queue, payload) {
     const pieceIndex = payload.readUInt32BE(0);
     // if(!requested[pieceIndex]){
     //     socket.write(message.buildRequest());
     // }
     // requested[pieceIndex] = true;
-    queue.push(pieceIndex);
-    if(queue.length === 1){
-        requestPiece(socket, requested, queue);
+    const queueEmpty = queue.length === 0;
+    queue.queue(pieceIndex);
+    if (queueEmpty) requestPiece(socket, pieces, queue);
+};
+
+function bitfieldHandler(socket, pieces, queue, payload) {
+    const queueEmpty = queue.length === 0;
+    payload.forEach((byte, i) => {
+        for(let j=0; j<8 ; j++){
+            if(byte % 2) queue.queue(i * 8 + 7 - j);
+            byte = Math.floor(byte/2);
+        }
+    });
+    if(queueEmpty) requestPiece(socket, pieces, queue);
+};
+
+function pieceHandler(socket, pieces, queue, torrent, file, pieceResp) {
+    console.log(pieceResp);
+    pieces.addReceived(pieceResp);
+
+    const offset = pieceResp.index * torrent.info['piece length'] + pieceResp.begin;
+    fs.write(file, pieceResp.block, 0, pieceResp.block.length, offset, () => {});
+
+    if(pieces.isDone()) {
+        socket.end();
+        console.log("Done!!!");
+        try {
+            fs.closeSync(file);
+        } catch(e) {}
+        
+    } else {
+        requestPiece(socket, pieces, queue);
     }
-};
-
-function bitfieldHandler(payload) {
-
-};
-
-function pieceHandler(payload, socket, requested, queue) {
-    queue.shift();
-    requestPiece(socket, requested, queue);
 };
 
 function requestPiece(socket, pieces, queue) {
