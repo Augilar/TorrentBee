@@ -18,24 +18,28 @@ module.exports = (torrent, path) => {
     });
 };
 
-function download(peer, torrent, pieces) {
+function download(peer, torrent, pieces, file) {
     const socket = net.Socket();
     socket.on('error', console.log);
     socket.connect(peer.port, peer.ip, () => {
         console.log("tcp connection made");
         socket.write(message.buildHandshake(torrent));
+        //console.log('got here');
     });
     const queue = new Queue(torrent);
     onWholeMsg(socket, msg => {
-        msgHandler(msg, socket, pieces, queue);
+        msgHandler(msg, socket, pieces, queue, torrent, file);
     });
 };
 
 function onWholeMsg(socket, callback) {
+    console.log("onWholeMsg called");
     let savedBuf = Buffer.alloc(0);
     let handshake = true;
 
     socket.on('data', recvBuf => {
+        console.log("received something");
+
         //len of the whole msg
         const msgLen = () => handshake ? savedBuf.readUInt8(0) + 49 : savedBuf.readUInt32BE(0) + 4;
         savedBuf = Buffer.concat([savedBuf, recvBuf]);
@@ -48,7 +52,9 @@ function onWholeMsg(socket, callback) {
     });
 };
 
-function msgHandler(msg, socket, pieces, queue) {
+function msgHandler(msg, socket, pieces, queue, torrent, file) {
+    console.log("msgHandler called");
+
     if(isHandshake(msg)) {
         socket.write(message.buildInterested());
     } else {
@@ -56,26 +62,32 @@ function msgHandler(msg, socket, pieces, queue) {
 
         if (m.id === 0) chokeHandler(socket);
         if (m.id === 1) unchokeHandler(socket, pieces, queue);
-        if (m.id === 4) haveHandler(m.payload);
-        if (m.id === 5) bitfieldHandler(m.payload);
-        if (m.id === 7) pieceHandler(m.payload);
+        if (m.id === 4) haveHandler(socket, pieces, queue, m.payload);
+        if (m.id === 5) bitfieldHandler(socket, pieces, queue, m.payload);
+        if (m.id === 7) pieceHandler(socket, pieces, queue, torrent, file, m.payload);
     }
 };
 
 function isHandshake(msg) {
-    return msg.length === msg.readUInt8(0) + 49 && msg.toString('utf8', 1) === 'BitTorrent protocol';
+    console.log("isHandshake ??");
+
+    return msg.length === msg.readUInt8(0) + 49 && msg.toString('utf8', 1, 20) === 'BitTorrent protocol';
 };
 
 function chokeHandler(socket) {
+    console.log("choked!!!");
+
     socket.end();
 };
 
 function unchokeHandler(socket, pieces, queue) {
+    console.log("unchoked");
     queue.choked = false;
     requestPiece(socket, pieces, queue);
 };
 
 function haveHandler(socket, pieces, queue, payload) {
+    console.log("It have something");
     const pieceIndex = payload.readUInt32BE(0);
     // if(!requested[pieceIndex]){
     //     socket.write(message.buildRequest());
@@ -87,6 +99,7 @@ function haveHandler(socket, pieces, queue, payload) {
 };
 
 function bitfieldHandler(socket, pieces, queue, payload) {
+    console.log("bitfield received");
     const queueEmpty = queue.length === 0;
     payload.forEach((byte, i) => {
         for(let j=0; j<8 ; j++){
@@ -98,6 +111,7 @@ function bitfieldHandler(socket, pieces, queue, payload) {
 };
 
 function pieceHandler(socket, pieces, queue, torrent, file, pieceResp) {
+    console.log("piece recieved");
     console.log(pieceResp);
     pieces.addReceived(pieceResp);
 
@@ -123,8 +137,9 @@ function requestPiece(socket, pieces, queue) {
         const pieceBlock = queue.deque();
         if (pieces.needed(pieceBlock)) {
             socket.write(message.buildRequest(pieceBlock));
-            pieces.addRequest(pieceBlock);
+            pieces.addRequested(pieceBlock);
             break;
         }
     }
+    console.log("request made");
 };

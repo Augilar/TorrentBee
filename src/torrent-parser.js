@@ -4,6 +4,7 @@ const fs = require('fs');
 const bencode = require('bencode');
 const crypto = require('crypto');
 const bn = require('bn.js');
+const Buffer = require('buffer').Buffer;
 
 module.exports.open = (filepath) => {
     let torrent = bencode.decode(fs.readFileSync(filepath));
@@ -28,7 +29,8 @@ module.exports.size = (torrent) => {
 module.exports.BLOCK_LEN = Math.pow(2, 14);
 
 module.exports.pieceLen = (torrent, pieceIndex) => {
-    const totalLength = bn.fromBuffer(this.size(torrent)).toNumber();
+    const totalLengthBI = this.size(torrent).readBigUInt64BE(0);
+    const totalLength = Number(totalLengthBI);
     const pieceLength = torrent.info['piece length'];
 
     const lastPieceLength = totalLength % pieceLength;
@@ -44,7 +46,8 @@ module.exports.blocksPerPiece = (torrent, pieceIndex) => {
 
 module.exports.blockLen = (torrent, pieceIndex, blockIndex) => {
     const pieceLength = this.pieceLen(torrent, pieceIndex);
-    const lastPieceIndex = Math.floor(pieceLength / this.BLOCK_LEN);
+    const lastBlockLength = pieceLength % this.BLOCK_LEN;
+    const lastBlockIndex = Math.floor(pieceLength / this.BLOCK_LEN);
 
-    return blockIndex === lastPieceIndex ? lastPieceLength : this.BLOCK_LEN;
+    return blockIndex === lastBlockIndex ? lastBlockLength : this.BLOCK_LEN;
 }

@@ -15,11 +15,13 @@ module.exports.buildHandshake = torrent => {
     const buf = Buffer.alloc(68);
 
     buf.writeUInt8(19, 0);
-    buf.write('BitTorrent protocol', 1);
+    buf.write("BitTorrent protocol", 1);
     buf.writeUInt32BE(0, 20);
     buf.writeUInt32BE(0, 24);
     torrentParser.infoHash(torrent).copy(buf, 28);
-    buf.write(util.genId());
+    //console.log("bef write");
+    util.genId().copy(buf, 48);
+ 
     return buf;   
 }
 
@@ -41,7 +43,7 @@ module.exports.buildUnchoke = () => {
 
 module.exports.buildInterested = () => {
     const buf = Buffer.alloc(5);
-    buf.writeUInt32(1, 0);
+    buf.writeUInt32BE(1, 0);
     buf.writeUInt8(2, 4);
     return buf;
 };
@@ -62,7 +64,7 @@ module.exports.buildHave = payload => {
 };
 
 module.exports.buildBitfield = bitfield => {
-    const buf = Buffer.alloc(14);
+    const buf = Buffer.alloc(bitfield.length + 5);
     buf.writeUInt32BE(payload.length+1, 0); //length
     buf.writeUInt8(5, 4);                   //id
     bitfield.copy(buf, 5);
@@ -109,7 +111,7 @@ module.exports.buildPort = payload => {
 
 module.exports.parse = msg => {
     const id = msg.length > 4 ? msg.readInt8(4) : null;
-    const payload = msg.length > 5 ? msg.slice(5) : null;
+    let payload = msg.length > 5 ? msg.slice(5) : null;
     if(id == 6 || id == 7 || id == 8) {
         const rest = payload.slice(8);
         payload = {
