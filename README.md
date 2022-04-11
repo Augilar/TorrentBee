@@ -1,30 +1,58 @@
+<p align = "center">
+  <img src="./TorrentBee-logos.jpeg" alt="TorrentBee logo" title="TorrentBee"  height="350" style="display: block; margin: 0 auto" />
+<p/>
+
+
 # TorrentBee
 
----
+-----
 
-Contents of this file :
--------------------------
+## Contents of this file :
 
-* Introduction
-* Technologies used
-* Working
-* Current functionality
-* Future enhancements
+- [Introduction](#introduction)
+- [Built with](#built-with)
+  - [Smaller libraries](#smaller-libraries)
+- [How to install](#how-to-install)
+- [How to use the project](#how-to-use-the-project)
+- [Working](#working)
+- [Current functionality](#current-functionality)
+- [Future enhancements](#future-enhancements)
 
-INTRODUCTION
--------------
+## Introduction
 
 This is a personal torrent client application which is currently a command line application which is made using nodejs. What's special about this torrent client is that it uses UDP for communication with tracker server instead of TCP which makes it faster.
 
-TECHNOLOGIES USED
-------------------
+## Built with
 
-* dgram.js
+* Node.js
+
+### Smaller libraries
+
 * bencode.js
-* buffer.js
+* dgram.js
+* crypto.js
+* Buffer.js
+* bn.js
 
-WORKING
---------
+## How to install
+
+```
+  git clone "https://github.com/Augilar/TorrentBee.git"
+  //inside the directory
+  npm install
+  node index
+```
+## How to use the project
+
+- Download the torrent-info file of the file you want to download.
+- Keep the torrent-info file in the same directory as that of the project.
+- Change the file name in the index.js file.
+```
+  const torrent = torrentParser.open('test-torrent3.torrent');
+```
+- Enter `node index`
+
+## Working
 
 Before going into detail let's first understand how a torrent client works in a simple way.
 
@@ -39,27 +67,25 @@ Torrenting may seem complicated for simply downloading a file but it has its ele
 * If only one has the original file then sharing of the file happens in such a way that each one has to wait for the others to complete.
 * But in the case of torrent, even if the peer with the total file has lost the connection, others peers with only partia but different packets of data can send each other and doanloading can be completed.
 
-RESOURSES
-----------
+## Resources
 
-* Allen Kim's Blog
-* Kristewindman's Blog (recurse centre)
-* Unofficial documentation of bittorent
+* [Allen Kim's Blog](https://allenkim67.github.io/programming/2016/05/04/how-to-make-your-own-bittorrent-client.html)
+* [Kristewindman's Blog (recurse centre)](http://www.kristenwidman.com/blog/33/how-to-write-a-bittorrent-client-part-1/)
+* [Unofficial documentation of bittorent](https://wiki.theory.org/index.php/BitTorrentSpecification)
 
-CURRENT FUNCTIONALITY
-----------------------
+## Current Functionality
 
 * single file torrents
 * Only downloading no uploading functionality
 * command line application no frontend
 * Various optimal algorithms for downloading the data packets can be implemented on top of the existing algorithm.
 
-FUTURE ENHANCEMENTS
---------------------
+## Future Enhancements
 
 * Creating a frontend.
 * Makingg it functional for multiple file downloads.
 * Making uploads functional.
 * Apply different algorithm for peer connections.
 * A function to get the progress of download.
-* Create a TCP version i.e. which sends a TCP requests instead of UDP (depends on the tracker URL). 
+* Create a TCP version i.e. which sends a TCP requests instead of UDP (depends on the tracker URL).
+* Make it functional with Magnet links. 
