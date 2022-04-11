@@ -15,8 +15,8 @@ const urlParse = require('url').parse;
 // buf.writeUInt32BE(65535, 4);
 // console.log(buf.readBigUInt64BE(0));
 
-let torrent = bencode.decode(fs.readFileSync('test-torrent3.torrent'));
-console.log(torrent.info.pieces.length/20);
+let torrent = bencode.decode(fs.readFileSync('inscryption.torrent'));
+console.log(torrent.announce.toString('utf8'));
 
 // for(let i=0;i<torrent['announce-list'].length;i++){
 //     console.log(torrent['announce-list'][i].toString());
