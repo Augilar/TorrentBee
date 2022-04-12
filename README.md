@@ -1,13 +1,12 @@
+
+<h1 align="center"> TorrentBee </h1>
+
 <p align = "center">
   <img src="./TorrentBee-logos.jpeg" alt="TorrentBee logo" title="TorrentBee"  height="350" style="display: block; margin: 0 auto" />
-<p/>
+</p>
 
 
-# TorrentBee
-
------
-
-## Contents of this file :
+## :pushpin: Contents of this file :
 
 - [Introduction](#introduction)
 - [Built with](#built-with)
@@ -19,11 +18,13 @@
 - [Current functionality](#current-functionality)
 - [Future enhancements](#future-enhancements)
 
-## Introduction
+
+## :zap: Introduction
 
 This is a personal torrent client application which is currently a command line application which is made using nodejs. What's special about this torrent client is that it uses UDP for communication with tracker server instead of TCP which makes it faster.
 
-## Built with
+
+## :wrench: Built with
 
 * Node.js
 
@@ -35,7 +36,8 @@ This is a personal torrent client application which is currently a command line 
 * Buffer.js
 * bn.js
 
-## How to install
+
+## :arrow_double_down: How to install
 
 ```
   git clone "https://github.com/Augilar/TorrentBee.git"
@@ -43,7 +45,8 @@ This is a personal torrent client application which is currently a command line 
   npm install
   node index
 ```
-## How to use the project
+
+## :hammer: How to use the project
 
 - Download the torrent-info file of the file you want to download.
 - Keep the torrent-info file in the same directory as that of the project.
@@ -52,7 +55,8 @@ This is a personal torrent client application which is currently a command line 
 node index test-torrent3.torrent
 ```
 
-## Working
+
+## :mag: Working
 
 Before going into detail let's first understand how a torrent client works in a simple way.
 
@@ -67,7 +71,8 @@ Torrenting may seem complicated for simply downloading a file but it has its ele
 * If only one has the original file then sharing of the file happens in such a way that each one has to wait for the others to complete.
 * But in the case of torrent, even if the peer with the total file has lost the connection, others peers with only partia but different packets of data can send each other and doanloading can be completed.
 
-## Understanding the code
+
+## :thinking: Understanding the code
 
 The following is the short description of what the contents of the files are.
 
@@ -80,26 +85,30 @@ The following is the short description of what the contents of the files are.
 *  **Queue.js** - A class to store information of whether the torrent piece has been recieved or not.
 *  **pieces.js** - A class to manipulate the piece data recieved from the peers.
 
+
 The below diagram tries to show how the functions from different files are called and results finally downloading the required file.
 
 <p align="center">
   <img src="./flowchart.jpg" alt="flowchart" title="file structure"  height="600" style="display: block; margin: 0 auto" />
  <p/>
 
-## Resources
+
+## :books: Resources
 
 * [Allen Kim's Blog](https://allenkim67.github.io/programming/2016/05/04/how-to-make-your-own-bittorrent-client.html)
 * [Kristewindman's Blog (recurse centre)](http://www.kristenwidman.com/blog/33/how-to-write-a-bittorrent-client-part-1/)
 * [Unofficial documentation of bittorent](https://wiki.theory.org/index.php/BitTorrentSpecification)
 
-## Current Functionality
+
+## :fire: Current Functionality
 
 * single file torrents
 * Only downloading no uploading functionality
 * command line application no frontend
 * Various optimal algorithms for downloading the data packets can be implemented on top of the existing algorithm.
 
-## Future Enhancements
+
+## :bulb: Future Enhancements
 
 * Creating a frontend.
 * Making it functional for multiple file downloads.
