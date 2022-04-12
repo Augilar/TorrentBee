@@ -1,7 +1,7 @@
 
-            Fonts used: Lato-Regular,Quicksand-Bold 
+            Fonts used: Lora-Regular 
 
-            Colors used: 66A3BB,253A47  
+            Colors used: D8BCB6,905C4C  
 
             Icon url: https://thenounproject.com/term/bee/69331  
         
