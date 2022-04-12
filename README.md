@@ -15,6 +15,7 @@
 - [How to install](#how-to-install)
 - [How to use the project](#how-to-use-the-project)
 - [Working](#working)
+- [Understanding the code](#understanding-the-code)
 - [Current functionality](#current-functionality)
 - [Future enhancements](#future-enhancements)
 
@@ -38,7 +39,7 @@ This is a personal torrent client application which is currently a command line 
 
 ```
   git clone "https://github.com/Augilar/TorrentBee.git"
-  //inside the directory
+  cd TorrentBee
   npm install
   node index
 ```
@@ -46,11 +47,10 @@ This is a personal torrent client application which is currently a command line 
 
 - Download the torrent-info file of the file you want to download.
 - Keep the torrent-info file in the same directory as that of the project.
-- Change the file name in the index.js file.
+- Run the application with the torrent file name as the argument. 
 ```
-  const torrent = torrentParser.open('test-torrent3.torrent');
+node index test-torrent3.torrent
 ```
-- Enter `node index`
 
 ## Working
 
@@ -66,6 +66,25 @@ Torrenting may seem complicated for simply downloading a file but it has its ele
 
 * If only one has the original file then sharing of the file happens in such a way that each one has to wait for the others to complete.
 * But in the case of torrent, even if the peer with the total file has lost the connection, others peers with only partia but different packets of data can send each other and doanloading can be completed.
+
+## Understanding the code
+
+The following is the short description of what the contents of the files are.
+
+* **index.js** - It is the main file, which we have to run and it will call necessary functions.
+*  **download.js** - It contains functions required to make connections with peers and recieving data (as pieces and blocks).
+*  **torrent-parser.js** - It contains functions which parses the torrent info file.
+*  **tracker.js** - It contains functions dealing with buffers and sending connection requests to the tracker server in getting peer information in this file.
+*  **util.js** - It contains functions to generate a unique id for the torrent client so that it can be recognized by the tracker server and the peers during the interaction.
+*  **message.js** - It contains functions to identify and send different messages while communicating with the peers.
+*  **Queue.js** - A class to store information of whether the torrent piece has been recieved or not.
+*  **pieces.js** - A class to manipulate the piece data recieved from the peers.
+
+The below diagram tries to show how the functions from different files are called and results finally downloading the required file.
+
+<p align="center">
+  <img src="./flowchart.jpg" alt="flowchart" title="file structure"  height="600" style="display: block; margin: 0 auto" />
+ <p/>
 
 ## Resources
 
@@ -83,7 +102,7 @@ Torrenting may seem complicated for simply downloading a file but it has its ele
 ## Future Enhancements
 
 * Creating a frontend.
-* Makingg it functional for multiple file downloads.
+* Making it functional for multiple file downloads.
 * Making uploads functional.
 * Apply different algorithm for peer connections.
 * A function to get the progress of download.
