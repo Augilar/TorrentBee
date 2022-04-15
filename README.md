@@ -32,6 +32,7 @@ This is a personal torrent client application which is currently a command line 
 
 * bencode.js
 * dgram.js
+* net.js
 * crypto.js
 * Buffer.js
 * bn.js
